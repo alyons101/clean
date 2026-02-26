@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SparkClean — Professional Cleaning in London</title>
+<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Inter', -apple-system, sans-serif; background: #FAFAFA; color: #0F172A; }
+
+  @keyframes fadeUp   { from { opacity:0; transform:translateY(24px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes fadeIn   { from { opacity:0; } to { opacity:1; } }
+  @keyframes pulse-dot{ 0%,100%{transform:scale(1);opacity:1;} 50%{transform:scale(1.8);opacity:0;} }
+  @keyframes slideIn  { from { opacity:0; transform:translateY(20px) scale(.97); } to { opacity:1; transform:translateY(0) scale(1); } }
+  @keyframes barFill  { from { width:0; } to { width:var(--w); } }
+  @keyframes tick     { 0%{opacity:0;transform:translateY(10px);} 100%{opacity:1;transform:translateY(0);} }
+
+  .fade-up   { animation: fadeUp  .55s cubic-bezier(.22,1,.36,1) both; }
+  .fade-in   { animation: fadeIn  .4s ease both; }
+  .slide-in  { animation: slideIn .35s cubic-bezier(.22,1,.36,1) both; }
+  .delay-1   { animation-delay:.1s; }
+  .delay-2   { animation-delay:.2s; }
+  .delay-3   { animation-delay:.35s; }
+  .delay-4   { animation-delay:.5s; }
+
+  .btn-primary { background:#0F172A; color:#fff; border:none; border-radius:8px; padding:13px 24px; font-size:15px; font-weight:600; cursor:pointer; transition:transform .15s, box-shadow .15s; }
+  .btn-primary:hover { transform:translateY(-1px); box-shadow:0 4px 16px rgba(15,23,42,.2); }
+  .btn-primary:active { transform:scale(.98); }
+  .btn-emerald { background:#059669; color:#fff; border:none; border-radius:8px; padding:13px 24px; font-size:15px; font-weight:600; cursor:pointer; transition:transform .15s, box-shadow .15s; box-shadow:0 2px 12px rgba(5,150,105,.3); }
+  .btn-emerald:hover { transform:translateY(-1px); box-shadow:0 4px 20px rgba(5,150,105,.4); }
+  .btn-ghost   { background:transparent; border:1.5px solid rgba(255,255,255,.5); color:#fff; border-radius:8px; padding:11px 20px; font-size:14px; font-weight:600; cursor:pointer; transition:background .2s; }
+  .btn-ghost:hover { background:rgba(255,255,255,.08); }
+  .btn-outline { background:transparent; border:1.5px solid #0F172A; color:#0F172A; border-radius:8px; padding:11px 20px; font-size:14px; font-weight:600; cursor:pointer; transition:background .2s; }
+  .btn-outline:hover { background:#F8FAFC; }
+
+  .card { background:#fff; border:1px solid #E2E8F0; border-radius:12px; box-shadow:0 1px 3px rgba(15,23,42,.05); }
+  .card-hover { transition:transform .2s, box-shadow .2s; }
+  .card-hover:hover { transform:translateY(-3px); box-shadow:0 8px 24px rgba(15,23,42,.1); }
+
+  .input-field { width:100%; padding:12px 16px; border-radius:8px; border:1px solid #E2E8F0; font-size:15px; font-family:'Inter',sans-serif; outline:none; transition:border-color .2s; }
+  .input-field:focus { border-color:#0F172A; }
+
+  .modal-overlay { position:fixed; inset:0; z-index:90; background:rgba(15,23,42,.55); backdrop-filter:blur(4px); display:flex; align-items:flex-end; justify-content:center; animation:fadeIn .2s ease; }
+  @media(min-width:640px){ .modal-overlay { align-items:center; } }
+  .modal-sheet { background:#fff; border-radius:20px 20px 0 0; width:100%; max-width:540px; max-height:90vh; overflow-y:auto; animation:slideIn .3s cubic-bezier(.22,1,.36,1); }
+  @media(min-width:640px){ .modal-sheet { border-radius:16px; } }
+
+  .pill-badge { display:inline-flex; align-items:center; gap:5px; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:600; }
+  .badge-emerald { background:#D1FAE5; color:#065F46; }
+  .badge-navy    { background:#0F172A; color:#fff; }
+  .badge-amber   { background:#FEF3C7; color:#92400E; }
+
+  .progress-bar { height:3px; background:#E2E8F0; }
+  .progress-fill { height:100%; background:#059669; border-radius:2px; transition:width .4s cubic-bezier(.22,1,.36,1); }
+
+  .radio-card { padding:14px 16px; border-radius:12px; border:1px solid #E2E8F0; background:#fff; cursor:pointer; transition:border-color .2s, background .2s; text-align:left; width:100%; }
+  .radio-card.selected { border:2px solid #0F172A; background:#F8FAFC; }
+
+  .time-card { padding:14px 16px; border-radius:12px; border:1px solid #E2E8F0; background:#fff; cursor:pointer; transition:border-color .2s, background .2s; display:flex; align-items:center; justify-content:space-between; width:100%; }
+  .time-card.selected { border:2px solid #0F172A; background:#F8FAFC; }
+
+  .avail-cell { height:40px; border-radius:6px; border:1px solid #E2E8F0; background:#fff; cursor:pointer; transition:background .15s, border-color .15s; display:flex; align-items:center; justify-content:center; }
+  .avail-cell.on { background:#059669; border-color:#059669; }
+
+  .star { color:#FBBF24; }
+  .dot-pulse { width:10px; height:10px; border-radius:50%; background:#059669; display:inline-block; position:relative; }
+  .dot-pulse::before { content:''; position:absolute; inset:-3px; border-radius:50%; background:#059669; opacity:.4; animation:pulse-dot 1.5s ease-in-out infinite; }
+
+  .live-feed { position:fixed; bottom:24px; left:24px; z-index:40; display:none; }
+  @media(min-width:640px){ .live-feed { display:block; } }
+  .live-card { background:#fff; border:1px solid #E2E8F0; border-radius:12px; padding:12px 16px; box-shadow:0 4px 12px rgba(15,23,42,.08); display:flex; align-items:center; gap:10px; animation:tick .4s ease; }
+
+  .section-title { font-family:'Playfair Display', Georgia, serif; font-size:clamp(28px,4vw,38px); font-weight:700; color:#0F172A; letter-spacing:-.02em; line-height:1.2; }
+  .hero-title { font-family:'Playfair Display', Georgia, serif; font-size:clamp(36px,5vw,52px); font-weight:700; color:#fff; line-height:1.15; letter-spacing:-.02em; }
+
+  .nav-solid { background:rgba(255,255,255,.88)!important; backdrop-filter:blur(20px) saturate(180%)!important; border-bottom:1px solid #E2E8F0!important; box-shadow:0 4px 12px rgba(15,23,42,.08)!important; }
+
+  details summary { list-style:none; cursor:pointer; }
+  details summary::-webkit-details-marker { display:none; }
+
+  ::-webkit-scrollbar { width:6px; }
+  ::-webkit-scrollbar-track { background:transparent; }
+  ::-webkit-scrollbar-thumb { background:#CBD5E1; border-radius:3px; }
+</style>
+</head>
+<body>
+
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState, useEffect, useRef } = React;
+
+/* ── ICONS (inline SVG) ── */
+const Icon = ({ d, size=18, color="currentColor", strokeWidth=1.75, fill="none" }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill={fill} stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
+    {Array.isArray(d) ? d.map((p,i) => <path key={i} d={p}/>) : <path d={d}/>}
+  </svg>
+);
+const icons = {
+  sparkle:  "M12 3l1.88 5.12L19 10l-5.12 1.88L12 17l-1.88-5.12L5 10l5.12-1.88L12 3z",
+  phone:    "M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 8.67 19.79 19.79 0 01.19 2.2 2 2 0 012.17 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.91a16 16 0 006.29 6.29l.82-.82a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z",
+  x:        ["M18 6L6 18","M6 6l12 12"],
+  check:    "M20 6L9 17l-5-5",
+  chevR:    "M9 18l6-6-6-6",
+  chevD:    "M6 9l6 6 6-6",
+  star:     "M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z",
+  shield:   "M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z",
+  calendar: ["M3 9h18","M16 2v4M8 2v4","rect x=3 y=4 width=18 height=18 rx=2"],
+  home:     ["M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z","M9 22V12h6v10"],
+  building: ["rect x=2 y=3 width=20 height=18 rx=1","M8 3v18","M16 3v18","M2 9h20","M2 15h20"],
+  arrowR:   ["M5 12h14","M12 5l7 7-7 7"],
+  msg:      "M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z",
+  card:     ["rect x=1 y=4 width=22 height=16 rx=2","M1 10h22"],
+  badge:    ["M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z","M9 12l2 2 4-4"],
+  zap:      "M13 2L3 14h9l-1 8 10-12h-9l1-8z",
+  trend:    ["M22 7l-9.5 9.5-5-5L1 17","M16 7h6v6"],
+  thumb:    "M14 9V5a3 3 0 00-3-3l-4 9v11h11.28a2 2 0 002-1.7l1.38-9a2 2 0 00-2-2.3zM7 22H4a2 2 0 01-2-2v-7a2 2 0 012-2h3",
+  layers:   ["M12 2L2 7l10 5 10-5-10-5","M2 17l10 5 10-5","M2 12l10 5 10-5"],
+  checkC:   ["circle cx=12 cy=12 r=10","M9 12l2 2 4-4"],
+  mapPin:   ["M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z","circle cx=12 cy=10 r=3"],
+  users:    ["M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2","circle cx=9 cy=7 r=4","M23 21v-2a4 4 0 00-3-3.87","M16 3.13a4 4 0 010 7.75"],
+};
+
+/* Compound SVG icons */
+function SvgIcon({ name, size=18, color="currentColor", sw=1.75 }){
+  const strokes = {
+    calendar: [
+      <rect key="r" x="3" y="4" width="18" height="18" rx="2"/>,
+      <line key="l1" x1="3" y1="9" x2="21" y2="9"/>,
+      <line key="l2" x1="16" y1="2" x2="16" y2="6"/>,
+      <line key="l3" x1="8" y1="2" x2="8" y2="6"/>,
+    ],
+    building: [
+      <rect key="r" x="2" y="3" width="20" height="18" rx="1"/>,
+      <line key="v1" x1="8" y1="3" x2="8" y2="21"/>,
+      <line key="v2" x1="16" y1="3" x2="16" y2="21"/>,
+      <line key="h1" x1="2" y1="9" x2="22" y2="9"/>,
+      <line key="h2" x1="2" y1="15" x2="22" y2="15"/>,
+    ],
+    checkC: [
+      <circle key="c" cx="12" cy="12" r="10"/>,
+      <polyline key="p" points="9 12 11 14 15 10"/>,
+    ],
+    badge: [
+      <path key="s" d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>,
+      <polyline key="p" points="9 12 11 14 15 10"/>,
+    ],
+    home: [
+      <path key="h" d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>,
+      <polyline key="d" points="9 22 9 12 15 12 15 22"/>,
+    ],
+    users: [
+      <path key="p1" d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>,
+      <circle key="c1" cx="9" cy="7" r="4"/>,
+      <path key="p2" d="M23 21v-2a4 4 0 00-3-3.87"/>,
+      <path key="p3" d="M16 3.13a4 4 0 010 7.75"/>,
+    ],
+    thumb: [
+      <path key="p1" d="M14 9V5a3 3 0 00-3-3l-4 9v11h11.28a2 2 0 002-1.7l1.38-9a2 2 0 00-2-2.3z"/>,
+      <path key="p2" d="M7 22H4a2 2 0 01-2-2v-7a2 2 0 012-2h3"/>,
+    ],
+    card: [
+      <rect key="r" x="1" y="4" width="22" height="16" rx="2" ry="2"/>,
+      <line key="l" x1="1" y1="10" x2="23" y2="10"/>,
+    ],
+    mapPin: [
+      <path key="p" d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/>,
+      <circle key="c" cx="12" cy="10" r="3"/>,
+    ],
+  };
+  if (strokes[name]) return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round">
+      {strokes[name]}
+    </svg>
+  );
+  return <Icon d={icons[name]} size={size} color={color} strokeWidth={sw}/>;
+}
+
+/* ── NAVIGATION ── */
+function Nav({ onBook, onCleaner }) {
+  const [scrolled, setScrolled] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
+  useEffect(()=>{
+    const fn = () => setScrolled(window.scrollY>100);
+    window.addEventListener('scroll', fn);
+    return ()=>window.removeEventListener('scroll',fn);
+  },[]);
+
+  return (
+    <>
+    <header style={{
+      position:'fixed', top:0, left:0, right:0, zIndex:50,
+      transition:'all .3s ease',
+      background: scrolled ? 'rgba(255,255,255,.88)' : 'transparent',
+      backdropFilter: scrolled ? 'blur(20px) saturate(180%)' : 'none',
+      borderBottom: scrolled ? '1px solid #E2E8F0' : '1px solid transparent',
+      boxShadow: scrolled ? '0 4px 12px rgba(15,23,42,.08)' : 'none',
+    }}>
+      <div style={{maxWidth:1140,margin:'0 auto',padding:'0 24px',height:70,display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+        {/* Logo */}
+        <div style={{display:'flex',alignItems:'center',gap:8}}>
+          <div style={{width:34,height:34,borderRadius:8,background:'#0F172A',display:'flex',alignItems:'center',justifyContent:'center'}}>
+            <SvgIcon name="sparkle" size={18} color="#fff" sw={2}/>
+          </div>
+          <span style={{fontSize:20,fontWeight:700,color:scrolled?'#0F172A':'#fff',fontFamily:"'Playfair Display',Georgia,serif",letterSpacing:'-.01em'}}>SparkClean</span>
+        </div>
+        {/* Nav right */}
+        <div style={{display:'flex',alignItems:'center',gap:10}}>
+          <a href="tel:02079460958" style={{fontSize:13,color:scrolled?'#64748B':'rgba(255,255,255,.75)',textDecoration:'none',display:'flex',alignItems:'center',gap:5}}>
+            <SvgIcon name="phone" size={13} color="currentColor"/>
+            020 7946 0958
+          </a>
+          <button onClick={()=>setHelpOpen(true)} style={{background:'none',border:'none',cursor:'pointer',fontSize:13,color:scrolled?'#64748B':'rgba(255,255,255,.75)',padding:'8px 10px'}}>Help</button>
+          <button className="btn-ghost" style={{borderColor:scrolled?'#0F172A':'undefined',color:scrolled?'#0F172A':'undefined',background:scrolled?'transparent':'undefined'}} onClick={onCleaner}>Become Cleaner</button>
+          <button style={{
+            padding:'10px 22px', borderRadius:8, fontSize:14, fontWeight:600, cursor:'pointer', border:'none',
+            background:scrolled?'#0F172A':'#fff', color:scrolled?'#fff':'#0F172A',
+            boxShadow:'0 1px 3px rgba(15,23,42,.08)', transition:'transform .15s'
+          }} onMouseEnter={e=>e.currentTarget.style.transform='translateY(-1px)'} onMouseLeave={e=>e.currentTarget.style.transform='none'} onClick={onBook}>
+            Book Clean
+          </button>
+        </div>
+      </div>
+    </header>
+
+    {/* Help modal */}
+    {helpOpen && (
+      <div className="modal-overlay" onClick={()=>setHelpOpen(false)}>
+        <div className="modal-sheet" style={{maxWidth:420,borderRadius:16}} onClick={e=>e.stopPropagation()}>
+          <div style={{padding:'20px 24px 16px',display:'flex',justifyContent:'space-between',alignItems:'center',borderBottom:'1px solid #E2E8F0'}}>
+            <span style={{fontSize:18,fontWeight:700}}>How can we help?</span>
+            <button onClick={()=>setHelpOpen(false)} style={{background:'none',border:'none',cursor:'pointer',padding:4}}><SvgIcon name="x" size={18} color="#64748B"/></button>
+          </div>
+          <div style={{padding:20,display:'flex',flexDirection:'column',gap:10}}>
+            {[
+              {icon:'phone',   label:'Call us',       sub:'Mon–Sat 8am–8pm',             cta:'020 7946 0958'},
+              {icon:'msg',     label:'WhatsApp',      sub:'Usually replies in 5 min',     cta:'Chat now'},
+              {icon:'calendar',label:'Reschedule',    sub:'Change your booking',          cta:'Manage booking'},
+            ].map((item,i)=>(
+              <div key={i} style={{display:'flex',alignItems:'center',gap:12,padding:14,borderRadius:10,border:'1px solid #E2E8F0',cursor:'pointer'}}
+                onMouseEnter={e=>e.currentTarget.style.background='#FAFAFA'} onMouseLeave={e=>e.currentTarget.style.background='#fff'}>
+                <div style={{width:38,height:38,borderRadius:10,background:'#F1F5F9',display:'flex',alignItems:'center',justifyContent:'center'}}>
+                  <SvgIcon name={item.icon} size={17} color="#0F172A"/>
+                </div>
+                <div style={{flex:1}}>
+                  <div style={{fontSize:14,fontWeight:600}}>{item.label}</div>
+                  <div style={{fontSize:12,color:'#64748B'}}>{item.sub}</div>
+                </div>
+                <span style={{fontSize:13,color:'#059669',fontWeight:600}}>{item.cta}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    )}
+    </>
+  );
+}
+
+/* ── HERO ── */
+function Hero({ onBook }) {
+  return (
+    <section style={{
+      minHeight:'100vh', display:'flex', alignItems:'center',
+      background:'linear-gradient(135deg,#0F172A 0%,#1a2744 55%,#0c1929 100%)',
+      overflow:'hidden', position:'relative',
+    }}>
+      <div style={{position:'absolute',inset:0,background:'radial-gradient(circle at 25% 30%, rgba(255,255,255,.03) 0%,transparent 55%), radial-gradient(circle at 75% 70%, rgba(5,150,105,.06) 0%,transparent 55%)'}}/>
+      <div style={{maxWidth:1140,margin:'0 auto',padding:'120px 24px 80px',position:'relative'}}>
+        <div style={{maxWidth:620}}>
+          {/* Stars + review count */}
+          <div className="fade-up delay-1" style={{display:'flex',alignItems:'center',gap:10,flexWrap:'wrap',marginBottom:28}}>
+            <div style={{display:'flex',gap:2}}>
+              {[1,2,3,4,5].map(s=><SvgIcon key={s} name="star" size={15} color="#FBBF24" sw={0} />)}
+            </div>
+            <span style={{color:'rgba(255,255,255,.85)',fontSize:14,fontWeight:500}}>4.9/5 from 2,847 reviews</span>
+            <span style={{color:'rgba(255,255,255,.3)',fontSize:14}}>·</span>
+            <span style={{color:'rgba(255,255,255,.6)',fontSize:14}}>Trustpilot Verified</span>
+          </div>
+
+          {/* Headline */}
+          <h1 className="hero-title fade-up delay-2" style={{marginBottom:20}}>
+            Professional cleaning.<br/>
+            <span style={{color:'#059669'}}>Booked in 60 seconds.</span>
+          </h1>
+          <p className="fade-up delay-2" style={{fontSize:17,color:'rgba(255,255,255,.7)',lineHeight:1.65,marginBottom:32,maxWidth:460}}>
+            Vetted, insured cleaners across London. No contracts, no hassle. Just a spotless home whenever you need it.
+          </p>
+
+          {/* CTA */}
+          <div className="fade-up delay-3" style={{marginBottom:20}}>
+            <button className="btn-emerald" style={{fontSize:16,fontWeight:700,padding:'15px 32px',borderRadius:10,display:'inline-flex',alignItems:'center',gap:8}} onClick={onBook}>
+              Book Your Clean
+              <SvgIcon name="arrowR" size={17} color="#fff"/>
+            </button>
+          </div>
+          <p className="fade-up delay-3" style={{fontSize:13,color:'rgba(255,255,255,.45)',marginBottom:32}}>From £15/hr · No commitment · Pay after your clean</p>
+
+          {/* Live availability */}
+          <div className="fade-up delay-4" style={{display:'inline-flex',alignItems:'center',gap:10,padding:'12px 18px',borderRadius:12,background:'rgba(255,255,255,.06)',border:'1px solid rgba(255,255,255,.08)'}}>
+            <span className="dot-pulse"/>
+            <span style={{fontSize:14,color:'rgba(255,255,255,.85)',fontWeight:500}}>3 cleaners available in SW6 today</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ── STATS BAR ── */
+function StatsBar() {
+  const stats = [
+    {v:'12,400+', l:'Cleans completed'},
+    {v:'98%',     l:'Rebook rate'},
+    {v:'4.9★',   l:'Average rating'},
+    {v:'40+',    l:'Vetted cleaners'},
+  ];
+  return (
+    <div style={{background:'#fff',borderBottom:'1px solid #E2E8F0'}}>
+      <div style={{maxWidth:1140,margin:'0 auto',padding:'0 24px',display:'grid',gridTemplateColumns:'repeat(4,1fr)'}}>
+        {stats.map((s,i)=>(
+          <div key={i} style={{padding:'26px 16px',textAlign:'center',borderRight:i<3?'1px solid #E2E8F0':'none'}}>
+            <div style={{fontSize:22,fontWeight:700,color:'#0F172A',letterSpacing:'-.02em'}}>{s.v}</div>
+            <div style={{fontSize:12,color:'#64748B',marginTop:3}}>{s.l}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ── SERVICES ── */
+function Services({ onSelect }) {
+  const services = [
+    {name:'Regular Clean',     price:15, desc:'Your home, consistently fresh',  features:['Kitchen & bathrooms','Dusting & hoovering','Mopping hard floors'], popular:true,  badge:null},
+    {name:'Deep Clean',        price:18, desc:'Every corner, thoroughly handled',features:['Inside appliances','Behind furniture','Window sills & frames'],    popular:false, badge:'Most thorough'},
+    {name:'End of Tenancy',    price:20, desc:'Move-in ready guarantee',         features:['Full property deep clean','Deposit-standard finish','Checklist provided'], popular:false, badge:'Guaranteed'},
+  ];
+  return (
+    <section style={{background:'#FAFAFA',padding:'96px 24px'}}>
+      <div style={{maxWidth:1140,margin:'0 auto'}}>
+        <div style={{textAlign:'center',marginBottom:52}}>
+          <h2 className="section-title" style={{marginBottom:12}}>Choose your clean</h2>
+          <p style={{fontSize:16,color:'#64748B',maxWidth:440,margin:'0 auto',lineHeight:1.6}}>Three options. No hidden fees. Every cleaner is vetted, insured, and reviewed.</p>
+        </div>
+        <div style={{display:'grid',gap:24,gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))'}}>
+          {services.map((s,i)=>(
+            <div key={i} className="card card-hover" style={{padding:28,position:'relative',border:s.popular?'2px solid #0F172A':'1px solid #E2E8F0',boxShadow:s.popular?'0 4px 12px rgba(15,23,42,.08)':undefined,cursor:'pointer'}} onClick={()=>onSelect(i)}>
+              {s.badge && <span className="pill-badge badge-navy" style={{position:'absolute',top:-13,right:20}}>{s.badge}</span>}
+              {s.popular && <span className="pill-badge badge-emerald" style={{position:'absolute',top:-13,left:20}}>Most popular</span>}
+              <div style={{marginBottom:20}}>
+                <h3 style={{fontSize:19,fontWeight:700,marginBottom:5}}>{s.name}</h3>
+                <p style={{fontSize:13,color:'#64748B'}}>{s.desc}</p>
+              </div>
+              <div style={{display:'flex',alignItems:'baseline',gap:3,marginBottom:22}}>
+                <span style={{fontSize:34,fontWeight:700,letterSpacing:'-.02em'}}>£{s.price}</span>
+                <span style={{fontSize:15,color:'#64748B'}}>/hr</span>
+              </div>
+              <div style={{display:'flex',flexDirection:'column',gap:10,marginBottom:24}}>
+                {s.features.map((f,fi)=>(
+                  <div key={fi} style={{display:'flex',alignItems:'center',gap:8}}>
+                    <SvgIcon name="check" size={15} color="#059669" sw={2.5}/>
+                    <span style={{fontSize:13,color:'#1E293B'}}>{f}</span>
+                  </div>
+                ))}
+              </div>
+              <button className={s.popular?'btn-primary':'btn-outline'} style={{width:'100%',display:'flex',alignItems:'center',justifyContent:'center',gap:6}}>
+                Select &amp; Book <SvgIcon name="chevR" size={15} color="currentColor"/>
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ── HOW IT WORKS ── */
+function HowItWorks() {
+  const steps = [
+    {icon:'calendar', title:'Pick your time',  desc:'Choose a date, time slot, and duration. It takes under a minute.'},
+    {icon:'badge',    title:'We match you',    desc:'Our system assigns your nearest vetted, highly-rated cleaner automatically.'},
+    {icon:'sparkle',  title:'Enjoy your clean',desc:'Pay only after you\'re satisfied. Rebook or switch cleaners anytime.'},
+  ];
+  return (
+    <section style={{background:'#fff',padding:'96px 24px'}}>
+      <div style={{maxWidth:1140,margin:'0 auto'}}>
+        <h2 className="section-title" style={{textAlign:'center',marginBottom:52}}>How it works</h2>
+        <div style={{display:'grid',gap:32,gridTemplateColumns:'repeat(auto-fit,minmax(260px,1fr))'}}>
+          {steps.map((s,i)=>(
+            <div key={i} style={{textAlign:'center'}}>
+              <div style={{position:'relative',display:'inline-block',marginBottom:20}}>
+                <div style={{width:60,height:60,borderRadius:14,background:'#F1F5F9',display:'flex',alignItems:'center',justifyContent:'center'}}>
+                  <SvgIcon name={s.icon} size={26} color="#0F172A" sw={1.5}/>
+                </div>
+                <span style={{position:'absolute',top:-8,right:-8,width:22,height:22,borderRadius:11,background:'#0F172A',color:'#fff',fontSize:11,fontWeight:700,display:'flex',alignItems:'center',justifyContent:'center'}}>{i+1}</span>
+              </div>
+              <h3 style={{fontSize:17,fontWeight:700,marginBottom:8}}>{s.title}</h3>
+              <p style={{fontSize:14,color:'#64748B',lineHeight:1.65,maxWidth:300,margin:'0 auto'}}>{s.desc}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ── TESTIMONIALS ── */
+function Testimonials() {
+  const reviews = [
+    {name:'Sarah M.',  area:'Chelsea',  text:'Absolutely brilliant. My flat has never looked this good. Punctual, thorough, and incredibly professional.'},
+    {name:'James K.',  area:'Fulham',   text:'Booking took literally one minute. The cleaner knew exactly what to do and my kitchen is spotless.'},
+    {name:'Priya R.',  area:'Battersea',text:'I\'ve tried three cleaning services. SparkClean is the only one I\'ve stuck with. Consistent quality every time.'},
+  ];
+  const [idx, setIdx] = useState(0);
+  const [key, setKey] = useState(0);
+  useEffect(()=>{
+    const t = setInterval(()=>{ setIdx(p=>(p+1)%reviews.length); setKey(p=>p+1); },4000);
+    return ()=>clearInterval(t);
+  },[]);
+  return (
+    <section style={{background:'#FAFAFA',padding:'96px 24px'}}>
+      <div style={{maxWidth:1140,margin:'0 auto'}}>
+        <h2 className="section-title" style={{textAlign:'center',marginBottom:48}}>What our clients say</h2>
+        <div style={{maxWidth:560,margin:'0 auto'}}>
+          <div key={key} className="slide-in card" style={{padding:32,textAlign:'center',boxShadow:'0 4px 12px rgba(15,23,42,.08)'}}>
+            <div style={{display:'flex',gap:3,justifyContent:'center',marginBottom:16}}>
+              {[1,2,3,4,5].map(s=><SvgIcon key={s} name="star" size={18} color="#FBBF24" sw={0}/>)}
+            </div>
+            <p style={{fontSize:16,color:'#1E293B',lineHeight:1.7,fontStyle:'italic',marginBottom:20}}>"{reviews[idx].text}"</p>
+            <p style={{fontWeight:700,fontSize:14}}>{reviews[idx].name}</p>
+            <p style={{fontSize:13,color:'#64748B',marginTop:3}}>{reviews[idx].area}</p>
+          </div>
+          <div style={{display:'flex',justifyContent:'center',gap:8,marginTop:20}}>
+            {reviews.map((_,i)=>(
+              <button key={i} onClick={()=>{setIdx(i);setKey(p=>p+1);}} style={{width:i===idx?22:8,height:8,borderRadius:4,border:'none',cursor:'pointer',background:i===idx?'#0F172A':'#E2E8F0',transition:'all .3s ease',padding:0}}/>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ── TRUST ── */
+function Trust() {
+  const badges = [
+    {icon:'shield', title:'Fully insured',         desc:'£2M public liability coverage on every clean'},
+    {icon:'badge',  title:'Background checked',    desc:'Enhanced DBS verification for all cleaners'},
+    {icon:'thumb',  title:'Satisfaction guarantee',desc:'Not happy? We\'ll send someone else, free'},
+    {icon:'zap',    title:'Instant matching',       desc:'Paired with your nearest top-rated cleaner'},
+  ];
+  return (
+    <section style={{background:'#fff',padding:'96px 24px'}}>
+      <div style={{maxWidth:1140,margin:'0 auto'}}>
+        <h2 className="section-title" style={{textAlign:'center',marginBottom:52}}>Why people trust SparkClean</h2>
+        <div style={{display:'grid',gap:20,gridTemplateColumns:'repeat(auto-fit,minmax(230px,1fr))'}}>
+          {badges.map((b,i)=>(
+            <div key={i} className="card" style={{padding:26,textAlign:'center'}}>
+              <div style={{width:50,height:50,borderRadius:12,background:'#F1F5F9',display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto 16px'}}>
+                <SvgIcon name={b.icon} size={22} color="#0F172A" sw={1.5}/>
+              </div>
+              <h3 style={{fontSize:15,fontWeight:700,marginBottom:6}}>{b.title}</h3>
+              <p style={{fontSize:13,color:'#64748B',lineHeight:1.55}}>{b.desc}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ── CLEANER CTA BANNER ── */
+function CleanerBanner({ onOpen }) {
+  return (
+    <section style={{background:'linear-gradient(135deg,#0F172A 0%,#1a2744 100%)',padding:'72px 24px'}}>
+      <div style={{maxWidth:600,margin:'0 auto',textAlign:'center'}}>
+        <h2 style={{fontFamily:"'Playfair Display',Georgia,serif",fontSize:'clamp(22px,4vw,32px)',fontWeight:700,color:'#fff',marginBottom:14,letterSpacing:'-.02em'}}>Want to clean with us?</h2>
+        <p style={{fontSize:15,color:'rgba(255,255,255,.7)',lineHeight:1.65,marginBottom:32}}>Set your own hours, earn £600+ per week, and join 40+ professional cleaners across London.</p>
+        <button className="btn-primary" style={{background:'#fff',color:'#0F172A',padding:'13px 28px',display:'inline-flex',alignItems:'center',gap:8}} onClick={onOpen}>
+          Apply in 2 minutes <SvgIcon name="arrowR" size={16} color="#0F172A"/>
+        </button>
+      </div>
+    </section>
+  );
+}
+
+/* ── FOOTER ── */
+function Footer() {
+  return (
+    <footer style={{background:'#0F172A',padding:'60px 24px 28px'}}>
+      <div style={{maxWidth:1140,margin:'0 auto'}}>
+        <div style={{display:'grid',gap:32,gridTemplateColumns:'repeat(auto-fit,minmax(180px,1fr))',marginBottom:40}}>
+          <div>
+            <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:14}}>
+              <SvgIcon name="sparkle" size={18} color="#fff" sw={2}/>
+              <span style={{fontSize:17,fontWeight:700,color:'#fff',fontFamily:"'Playfair Display',Georgia,serif"}}>SparkClean</span>
+            </div>
+            <p style={{fontSize:13,color:'rgba(255,255,255,.45)',lineHeight:1.65}}>London's most trusted cleaning marketplace. Vetted cleaners, no contracts, pay after your clean.</p>
+          </div>
+          {[
+            {title:'For Clients',  links:['Book a clean','Pricing','Areas we cover','FAQs']},
+            {title:'For Cleaners', links:['Join our team','How it works','Earnings','Support']},
+            {title:'Contact',      links:['020 7946 0958','WhatsApp us','hello@sparkclean.co.uk']},
+          ].map((col,i)=>(
+            <div key={i}>
+              <h4 style={{fontSize:12,fontWeight:600,color:'rgba(255,255,255,.55)',marginBottom:14,textTransform:'uppercase',letterSpacing:'.05em'}}>{col.title}</h4>
+              <div style={{display:'flex',flexDirection:'column',gap:8}}>
+                {col.links.map(l=><a key={l} href="#" style={{fontSize:13,color:'rgba(255,255,255,.45)',textDecoration:'none'}}>{l}</a>)}
+              </div>
+            </div>
+          ))}
+        </div>
+        <div style={{borderTop:'1px solid rgba(255,255,255,.08)',paddingTop:20,display:'flex',justifyContent:'space-between',flexWrap:'wrap',gap:12}}>
+          <span style={{fontSize:12,color:'rgba(255,255,255,.25)'}}>© 2026 SparkClean Ltd. All rights reserved.</span>
+          <div style={{display:'flex',gap:16}}>
+            {['Privacy','Terms','Cookies'].map(l=><a key={l} href="#" style={{fontSize:12,color:'rgba(255,255,255,.25)',textDecoration:'none'}}>{l}</a>)}
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
+}
+
+/* ── LIVE ACTIVITY FEED ── */
+function LiveFeed() {
+  const items = [
+    {name:'Sarah',  area:'Chelsea',   action:'booked 3 hours',        time:'2 min ago'},
+    {name:'Marcus', area:'Fulham',    action:'booked end of tenancy', time:'8 min ago'},
+    {name:'Aisha',  area:'Battersea', action:'booked 2 hours',        time:'14 min ago'},
+  ];
+  const [idx, setIdx] = useState(0);
+  const [k,   setK]   = useState(0);
+  useEffect(()=>{
+    const t = setInterval(()=>{ setIdx(p=>(p+1)%items.length); setK(p=>p+1); },5500);
+    return ()=>clearInterval(t);
+  },[]);
+  return (
+    <div className="live-feed">
+      <div key={k} className="live-card">
+        <div style={{width:30,height:30,borderRadius:15,background:'#D1FAE5',display:'flex',alignItems:'center',justifyContent:'center'}}>
+          <SvgIcon name="check" size={14} color="#059669" sw={2.5}/>
+        </div>
+        <div>
+          <div style={{fontSize:13,color:'#0F172A',fontWeight:500}}>{items[idx].name} from {items[idx].area}</div>
+          <div style={{fontSize:11,color:'#94A3B8'}}>{items[idx].action} · {items[idx].time}</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── BOOKING FUNNEL MODAL ── */
+function BookingModal({ isOpen, onClose, initService=0 }) {
+  const [step, setStep] = useState(1);
+  const [svc,  setSvc]  = useState(initService);
+  const [date, setDate] = useState(null);
+  const [time, setTime] = useState(null);
+  const [pc,   setPc]   = useState('');
+  const [pcOk, setPcOk] = useState(null);
+  const [beds, setBeds] = useState(2);
+  const [email,setEmail]= useState('');
+  const [phone,setPhone]= useState('');
+
+  useEffect(()=>{ if(isOpen){ setStep(1); setSvc(initService); setDate(null); setTime(null); setPc(''); setPcOk(null); setBeds(2); setEmail(''); setPhone(''); } },[isOpen,initService]);
+
+  if(!isOpen) return null;
+
+  const services = [
+    {name:'End of Tenancy', price:20, desc:'Deposit-standard finish',  anchor:true},
+    {name:'Deep Clean',     price:18, desc:'Every corner covered',     anchor:false},
+    {name:'Regular Clean',  price:15, desc:'Your home, always fresh',  anchor:false, value:true},
+  ];
+  const durations = {1:2,2:3,3:4,4:5};
+  const dur = durations[beds]||3;
+  const total = services[svc].price * dur;
+
+  const dates = Array.from({length:14},(_,i)=>{
+    const d = new Date(); d.setDate(d.getDate()+i+1); return d;
+  });
+  const timeslots = [
+    {label:'Morning',   range:'8am – 12pm',  slots:3, pop:false},
+    {label:'Afternoon', range:'12pm – 4pm',  slots:1, pop:true},
+    {label:'Evening',   range:'4pm – 8pm',   slots:2, pop:false},
+  ];
+
+  const validatePc = (v)=>{
+    if(!v) return null;
+    if(!/^[A-Z]{1,2}\d[A-Z\d]?\s?\d[A-Z]{2}$/i.test(v)) return false;
+    return ['SW','SE','W ','NW','N ','E ','EC','WC'].some(a=>v.toUpperCase().startsWith(a.trim()));
+  };
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-sheet" onClick={e=>e.stopPropagation()}>
+        {/* Header */}
+        <div style={{padding:'18px 22px 14px',display:'flex',justifyContent:'space-between',alignItems:'center',borderBottom:'1px solid #E2E8F0',position:'sticky',top:0,background:'#fff',zIndex:5}}>
+          <div>
+            <div style={{fontSize:18,fontWeight:700}}>Book Your Clean</div>
+            <div style={{fontSize:12,color:'#64748B',marginTop:2}}>Step {step} of 4</div>
+          </div>
+          <button onClick={onClose} style={{background:'none',border:'none',cursor:'pointer',padding:6}}><SvgIcon name="x" size={18} color="#64748B"/></button>
+        </div>
+        <div className="progress-bar"><div className="progress-fill" style={{width:`${(step/4)*100}%`}}/></div>
+
+        <div style={{padding:22}}>
+
+          {/* Step 1 – Service (price anchoring: expensive first) */}
+          {step===1 && (
+            <div>
+              <p style={{fontSize:14,color:'#64748B',marginBottom:18}}>What type of clean do you need?</p>
+              <div style={{display:'flex',flexDirection:'column',gap:10,marginBottom:22}}>
+                {services.map((s,i)=>(
+                  <button key={i} className={`radio-card ${svc===i?'selected':''}`} onClick={()=>setSvc(i)}>
+                    <div style={{display:'flex',alignItems:'center',gap:12}}>
+                      <div style={{width:20,height:20,borderRadius:10,border:svc===i?'none':'2px solid #E2E8F0',background:svc===i?'#0F172A':'transparent',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
+                        {svc===i && <SvgIcon name="check" size={13} color="#fff" sw={3}/>}
+                      </div>
+                      <div style={{flex:1}}>
+                        <div style={{display:'flex',alignItems:'center',gap:8}}>
+                          <span style={{fontSize:14,fontWeight:600}}>{s.name}</span>
+                          {s.value && <span className="pill-badge badge-emerald">Smart value</span>}
+                        </div>
+                        <span style={{fontSize:12,color:'#64748B'}}>{s.desc} · From £{s.price}/hr</span>
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+              <button className="btn-primary" style={{width:'100%',display:'flex',alignItems:'center',justifyContent:'center',gap:6}} onClick={()=>setStep(2)}>
+                Continue <SvgIcon name="chevR" size={15} color="#fff"/>
+              </button>
+            </div>
+          )}
+
+          {/* Step 2 – Date & Time */}
+          {step===2 && (
+            <div>
+              <p style={{fontSize:14,color:'#64748B',marginBottom:18}}>When works best for you?</p>
+              {/* Date grid */}
+              <div style={{marginBottom:20}}>
+                <div style={{fontSize:12,fontWeight:600,color:'#0F172A',marginBottom:8}}>Date</div>
+                <div style={{display:'grid',gridTemplateColumns:'repeat(7,1fr)',gap:4}}>
+                  {dates.map((d,i)=>{
+                    const sun = d.getDay()===0;
+                    const sel = date===i;
+                    return (
+                      <button key={i} disabled={sun} onClick={()=>setDate(i)} style={{
+                        padding:'8px 4px',borderRadius:8,cursor:sun?'not-allowed':'pointer',
+                        border:sel?'2px solid #0F172A':'1px solid #E2E8F0',
+                        background:sel?'#F8FAFC':'#fff',opacity:sun?.35:1,
+                        display:'flex',flexDirection:'column',alignItems:'center',
+                      }}>
+                        <span style={{fontSize:10,color:'#94A3B8'}}>{d.toLocaleDateString('en-GB',{weekday:'short'})}</span>
+                        <span style={{fontSize:14,fontWeight:sel?700:500}}>{d.getDate()}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+              {/* Time slots */}
+              <div style={{marginBottom:22}}>
+                <div style={{fontSize:12,fontWeight:600,color:'#0F172A',marginBottom:8}}>Time</div>
+                <div style={{display:'flex',flexDirection:'column',gap:8}}>
+                  {timeslots.map((t,i)=>(
+                    <button key={i} className={`time-card ${time===i?'selected':''}`} onClick={()=>setTime(i)}>
+                      <div style={{display:'flex',alignItems:'center',gap:10}}>
+                        <div style={{width:20,height:20,borderRadius:10,border:time===i?'none':'2px solid #E2E8F0',background:time===i?'#0F172A':'transparent',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
+                          {time===i && <SvgIcon name="check" size={13} color="#fff" sw={3}/>}
+                        </div>
+                        <span style={{fontSize:14,fontWeight:600}}>{t.label}</span>
+                        <span style={{fontSize:13,color:'#64748B'}}>{t.range}</span>
+                      </div>
+                      <div style={{display:'flex',alignItems:'center',gap:8}}>
+                        {t.pop && <span className="pill-badge" style={{background:'#F1F5F9',color:'#0F172A'}}>Most booked</span>}
+                        {t.slots<=2 && <span style={{fontSize:12,color:'#DC2626',fontWeight:500}}>{t.slots} left</span>}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div style={{display:'flex',gap:10}}>
+                <button className="btn-outline" onClick={()=>setStep(1)}>Back</button>
+                <button className="btn-primary" style={{flex:1,display:'flex',alignItems:'center',justifyContent:'center',gap:6,opacity:date!==null&&time!==null?1:.5}} disabled={date===null||time===null} onClick={()=>setStep(3)}>
+                  Continue <SvgIcon name="chevR" size={15} color="#fff"/>
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Step 3 – Location + Duration */}
+          {step===3 && (
+            <div>
+              <p style={{fontSize:14,color:'#64748B',marginBottom:18}}>Where and how long?</p>
+              <div style={{marginBottom:18}}>
+                <div style={{fontSize:12,fontWeight:600,marginBottom:8}}>Postcode</div>
+                <div style={{position:'relative'}}>
+                  <input className="input-field" value={pc} onChange={e=>{setPc(e.target.value);setPcOk(null);}} onBlur={()=>setPcOk(validatePc(pc))} placeholder="e.g. SW6 1AP" style={{borderColor:pcOk===false?'#DC2626':undefined}}/>
+                  {pcOk===true && <div style={{position:'absolute',right:12,top:'50%',transform:'translateY(-50%)'}}><SvgIcon name="checkC" size={18} color="#059669"/></div>}
+                </div>
+                {pcOk===false && <p style={{fontSize:12,color:'#DC2626',marginTop:6}}>We don't cover that area yet — leave your email and we'll notify you.</p>}
+              </div>
+              <div style={{marginBottom:20}}>
+                <div style={{fontSize:12,fontWeight:600,marginBottom:8}}>Home size</div>
+                <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:8}}>
+                  {[1,2,3,4].map(b=>(
+                    <button key={b} onClick={()=>setBeds(b)} style={{
+                      padding:'12px 6px',borderRadius:10,cursor:'pointer',textAlign:'center',
+                      border:beds===b?'2px solid #0F172A':'1px solid #E2E8F0',
+                      background:beds===b?'#F8FAFC':'#fff',
+                    }}>
+                      <div style={{fontSize:18,marginBottom:4}}>{b===1?'🏠':b===2?'🏡':b===3?'🏘️':'🏰'}</div>
+                      <div style={{fontSize:13,fontWeight:600}}>{b} bed</div>
+                      <div style={{fontSize:11,color:'#64748B'}}>{durations[b]}hrs</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+              {/* Price summary */}
+              <div style={{padding:14,borderRadius:10,background:'#F8FAFC',border:'1px solid #E2E8F0',marginBottom:20}}>
+                <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+                  <span style={{fontSize:13,color:'#64748B'}}>{services[svc].name} · {dur}hrs</span>
+                  <span style={{fontSize:22,fontWeight:700}}>£{total}</span>
+                </div>
+                <p style={{fontSize:11,color:'#94A3B8',marginTop:3}}>Pay after your clean is complete</p>
+              </div>
+              <div style={{display:'flex',gap:10}}>
+                <button className="btn-outline" onClick={()=>setStep(2)}>Back</button>
+                <button className="btn-primary" style={{flex:1,display:'flex',alignItems:'center',justifyContent:'center',gap:6,opacity:pcOk?1:.5}} disabled={!pcOk} onClick={()=>setStep(4)}>
+                  Almost done <SvgIcon name="chevR" size={15} color="#fff"/>
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Step 4 – Confirm */}
+          {step===4 && (
+            <div>
+              <p style={{fontSize:14,color:'#64748B',marginBottom:18}}>Just your details — no account needed.</p>
+              <div style={{display:'flex',flexDirection:'column',gap:14,marginBottom:20}}>
+                <div>
+                  <div style={{fontSize:12,fontWeight:600,marginBottom:7}}>Email</div>
+                  <input className="input-field" type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="you@email.com"/>
+                </div>
+                <div>
+                  <div style={{fontSize:12,fontWeight:600,marginBottom:7}}>Phone</div>
+                  <input className="input-field" type="tel" value={phone} onChange={e=>setPhone(e.target.value)} placeholder="07XXX XXX XXX"/>
+                </div>
+              </div>
+              {/* Order summary */}
+              <div style={{padding:16,borderRadius:10,background:'#F8FAFC',border:'1px solid #E2E8F0',marginBottom:18}}>
+                {[['Service',services[svc].name],['Duration',`${dur} hours`],['Rate',`£${services[svc].price}/hr`]].map(([k,v])=>(
+                  <div key={k} style={{display:'flex',justifyContent:'space-between',marginBottom:6}}>
+                    <span style={{fontSize:13,color:'#64748B'}}>{k}</span>
+                    <span style={{fontSize:13,fontWeight:500}}>{v}</span>
+                  </div>
+                ))}
+                <div style={{height:1,background:'#E2E8F0',margin:'10px 0'}}/>
+                <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+                  <span style={{fontSize:15,fontWeight:700}}>Total</span>
+                  <span style={{fontSize:22,fontWeight:700}}>£{total}</span>
+                </div>
+              </div>
+              <div style={{display:'flex',flexDirection:'column',gap:10,marginBottom:14}}>
+                <button style={{padding:'13px 24px',borderRadius:8,fontSize:14,fontWeight:700,cursor:'pointer',border:'none',background:'#000',color:'#fff',width:'100%'}}>
+                  Pay with Apple Pay
+                </button>
+                <button className="btn-emerald" style={{width:'100%',display:'flex',alignItems:'center',justifyContent:'center',gap:8,fontSize:15}}>
+                  <SvgIcon name="card" size={16} color="#fff"/> Confirm Booking — £{total}
+                </button>
+              </div>
+              <div style={{display:'flex',justifyContent:'center',gap:20,marginBottom:16}}>
+                {[['shield','Secure checkout'],['checkC','Pay after clean']].map(([ic,lb])=>(
+                  <div key={lb} style={{display:'flex',alignItems:'center',gap:5}}>
+                    <SvgIcon name={ic} size={13} color="#94A3B8"/>
+                    <span style={{fontSize:11,color:'#94A3B8'}}>{lb}</span>
+                  </div>
+                ))}
+              </div>
+              <button className="btn-outline" style={{width:'100%'}} onClick={()=>setStep(3)}>Back</button>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── CLEANER APPLICATION MODAL ── */
+function CleanerModal({ isOpen, onClose }) {
+  const [step, setStep] = useState(1);
+  const [phone,setPhone]=useState('');
+  const [name, setName] =useState('');
+  const [exp,  setExp]  =useState(null);
+  const [pc,   setPc]   =useState('');
+  const [avail,setAvail]=useState({});
+
+  useEffect(()=>{ if(isOpen){ setStep(1); setPhone(''); setName(''); setExp(null); setPc(''); setAvail({}); } },[isOpen]);
+  if(!isOpen) return null;
+
+  const days  = ['Mon','Tue','Wed','Thu','Fri','Sat'];
+  const slots = ['AM','PM','Eve'];
+  const toggle = (d,s) => { const k=`${d}-${s}`; setAvail(p=>({...p,[k]:!p[k]})); };
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-sheet" onClick={e=>e.stopPropagation()}>
+        <div style={{padding:'18px 22px 14px',display:'flex',justifyContent:'space-between',alignItems:'center',borderBottom:'1px solid #E2E8F0',position:'sticky',top:0,background:'#fff',zIndex:5}}>
+          <div>
+            <div style={{fontSize:18,fontWeight:700}}>Join SparkClean</div>
+            <div style={{fontSize:12,color:'#64748B',marginTop:2}}>{step<=3?`Step ${step} of 3 · 2 minutes`:'Application complete'}</div>
+          </div>
+          <button onClick={onClose} style={{background:'none',border:'none',cursor:'pointer',padding:6}}><SvgIcon name="x" size={18} color="#64748B"/></button>
+        </div>
+        <div className="progress-bar"><div className="progress-fill" style={{width:`${(Math.min(step,3)/3)*100}%`}}/></div>
+
+        <div style={{padding:22}}>
+          {/* Earnings banner */}
+          <div style={{padding:'10px 14px',borderRadius:10,background:'#D1FAE5',border:'1px solid #A7F3D0',display:'flex',alignItems:'center',gap:10,marginBottom:20}}>
+            <SvgIcon name="trend" size={17} color="#059669"/>
+            <span style={{fontSize:13,fontWeight:600,color:'#065F46'}}>Earn £600+ per week on your own schedule</span>
+          </div>
+
+          {step===1 && (
+            <div>
+              <p style={{fontSize:14,color:'#64748B',marginBottom:18}}>Start with just your mobile number.</p>
+              <div style={{marginBottom:18}}>
+                <div style={{fontSize:12,fontWeight:600,marginBottom:7}}>Mobile number</div>
+                <input className="input-field" type="tel" value={phone} onChange={e=>setPhone(e.target.value)} placeholder="07XXX XXX XXX" style={{fontSize:16}}/>
+              </div>
+              <div style={{padding:12,borderRadius:10,background:'#F8FAFC',border:'1px solid #E2E8F0',marginBottom:18}}>
+                <p style={{fontSize:12,color:'#64748B',lineHeight:1.5}}>Join <strong>40+ cleaners</strong> already in our private WhatsApp network. Flexible hours, weekly payouts, real support.</p>
+              </div>
+              <button className="btn-primary" style={{width:'100%',opacity:phone?1:.5}} disabled={!phone} onClick={()=>setStep(2)}>
+                Send verification code
+              </button>
+            </div>
+          )}
+
+          {step===2 && (
+            <div>
+              <p style={{fontSize:14,color:'#64748B',marginBottom:18}}>Tell us a bit about yourself.</p>
+              <div style={{display:'flex',flexDirection:'column',gap:12,marginBottom:18}}>
+                <div>
+                  <div style={{fontSize:12,fontWeight:600,marginBottom:7}}>Full name</div>
+                  <input className="input-field" type="text" value={name} onChange={e=>setName(e.target.value)} placeholder="Your name"/>
+                </div>
+                <div>
+                  <div style={{fontSize:12,fontWeight:600,marginBottom:7}}>Your postcode</div>
+                  <input className="input-field" type="text" value={pc} onChange={e=>setPc(e.target.value)} placeholder="e.g. SW6 1AP"/>
+                </div>
+                <div>
+                  <div style={{fontSize:12,fontWeight:600,marginBottom:8}}>Cleaning experience</div>
+                  <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:8}}>
+                    {['0–1 yr','1–3 yrs','3+ yrs'].map((e,i)=>(
+                      <button key={i} onClick={()=>setExp(i)} style={{
+                        padding:'10px 6px',borderRadius:8,cursor:'pointer',
+                        border:exp===i?'2px solid #0F172A':'1px solid #E2E8F0',
+                        background:exp===i?'#F8FAFC':'#fff',
+                        fontSize:13,fontWeight:exp===i?600:400,
+                      }}>{e}</button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <div style={{display:'flex',gap:10}}>
+                <button className="btn-outline" onClick={()=>setStep(1)}>Back</button>
+                <button className="btn-primary" style={{flex:1,opacity:(name&&exp!==null)?1:.5}} disabled={!name||exp===null} onClick={()=>setStep(3)}>Continue</button>
+              </div>
+            </div>
+          )}
+
+          {step===3 && (
+            <div>
+              <p style={{fontSize:14,color:'#64748B',marginBottom:14}}>Tap the times you're available. Change anytime.</p>
+              {/* Availability grid */}
+              <div style={{marginBottom:20,overflowX:'auto'}}>
+                <table style={{width:'100%',borderCollapse:'separate',borderSpacing:3}}>
+                  <thead>
+                    <tr>
+                      <th style={{width:36}}/>
+                      {days.map(d=><th key={d} style={{fontSize:11,fontWeight:600,color:'#64748B',textAlign:'center',padding:'4px 0'}}>{d}</th>)}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {slots.map(sl=>(
+                      <tr key={sl}>
+                        <td style={{fontSize:11,color:'#94A3B8',paddingRight:4,textAlign:'right'}}>{sl}</td>
+                        {days.map(d=>{
+                          const k=`${d}-${sl}`;
+                          const on=!!avail[k];
+                          return (
+                            <td key={d}>
+                              <button className={`avail-cell ${on?'on':''}`} style={{width:'100%'}} onClick={()=>toggle(d,sl)}>
+                                {on && <SvgIcon name="check" size={13} color="#fff" sw={3}/>}
+                              </button>
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              {/* £15 fee reframed */}
+              <div style={{padding:14,borderRadius:10,background:'#FFFBEB',border:'1px solid #FDE68A',marginBottom:18}}>
+                <div style={{fontSize:13,fontWeight:700,color:'#92400E',marginBottom:8}}>Starter Kit — £15 one-time fee</div>
+                {['Enhanced DBS background check (£10 value)','Public liability insurance activation (£5 value)','Welcome pack & cleaning supplies guide'].map((item,i)=>(
+                  <div key={i} style={{display:'flex',alignItems:'center',gap:7,marginBottom:5}}>
+                    <SvgIcon name="check" size={13} color="#92400E" sw={2.5}/>
+                    <span style={{fontSize:12,color:'#78350F'}}>{item}</span>
+                  </div>
+                ))}
+                <p style={{fontSize:11,color:'#A16207',marginTop:8,fontStyle:'italic'}}>100% refund if not approved within 48 hours</p>
+              </div>
+              <div style={{display:'flex',gap:10}}>
+                <button className="btn-outline" onClick={()=>setStep(2)}>Back</button>
+                <button className="btn-emerald" style={{flex:1,display:'flex',alignItems:'center',justifyContent:'center',gap:7}} onClick={()=>setStep(4)}>
+                  <SvgIcon name="msg" size={15} color="#fff"/> Complete &amp; Join WhatsApp
+                </button>
+              </div>
+            </div>
+          )}
+
+          {step===4 && (
+            <div style={{textAlign:'center',padding:'16px 0'}}>
+              <div style={{width:60,height:60,borderRadius:30,background:'#D1FAE5',display:'flex',alignItems:'center',justifyContent:'center',margin:'0 auto 18px'}}>
+                <SvgIcon name="checkC" size={30} color="#059669"/>
+              </div>
+              <h3 style={{fontSize:20,fontWeight:700,marginBottom:8}}>You're in{name?`, ${name}`:''}!</h3>
+              <p style={{fontSize:14,color:'#64748B',lineHeight:1.65,marginBottom:24}}>We'll verify your details within 48 hours. Join our cleaner community on WhatsApp now.</p>
+              <button style={{padding:'13px 24px',borderRadius:8,fontSize:15,fontWeight:700,cursor:'pointer',border:'none',background:'#25D366',color:'#fff',width:'100%',display:'flex',alignItems:'center',justifyContent:'center',gap:8}}>
+                <SvgIcon name="msg" size={17} color="#fff"/> Join WhatsApp Group
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── APP ── */
+function App() {
+  const [bookOpen,   setBookOpen]   = useState(false);
+  const [cleanOpen,  setCleanOpen]  = useState(false);
+  const [initSvc,    setInitSvc]    = useState(0);
+
+  const openBook = (idx=0) => { setInitSvc(idx); setBookOpen(true); };
+
+  return (
+    <>
+      <Nav onBook={()=>openBook()} onCleaner={()=>setCleanOpen(true)}/>
+      <Hero onBook={()=>openBook()}/>
+      <StatsBar/>
+      <Services onSelect={openBook}/>
+      <HowItWorks/>
+      <Testimonials/>
+      <Trust/>
+      <CleanerBanner onOpen={()=>setCleanOpen(true)}/>
+      <Footer/>
+      <LiveFeed/>
+      <BookingModal  isOpen={bookOpen}  onClose={()=>setBookOpen(false)}  initService={initSvc}/>
+      <CleanerModal  isOpen={cleanOpen} onClose={()=>setCleanOpen(false)}/>
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
